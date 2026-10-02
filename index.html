@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💀 Oktober Downloader</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+:root{
+  --primary:#6366f1;--primary-2:#8b5cf6;--accent:#22d3ee;--pink:#ec4899;
+  --bg:#0a0e27;--card:rgba(20,25,56,.9);--card-2:rgba(30,37,80,.7);
+  --text:#f1f5f9;--muted:#94a3b8;--border:rgba(99,102,241,.25);
+  --success:#10b981;--warn:#f59e0b;--danger:#ef4444;
+}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 15% 20%,rgba(99,102,241,.18) 0%,transparent 45%),radial-gradient(circle at 85% 75%,rgba(236,72,153,.15) 0%,transparent 45%),radial-gradient(circle at 50% 50%,rgba(34,211,238,.08) 0%,transparent 60%);z-index:-2;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(99,102,241,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.05) 1px,transparent 1px);background-size:40px 40px;z-index:-1;pointer-events:none;animation:gridMove 30s linear infinite}
+@keyframes gridMove{to{background-position:40px 40px}}
+.wrap{max-width:900px;margin:0 auto;padding:20px 14px 100px;position:relative}
+
+/* Header */
+.header{text-align:center;margin-bottom:24px}
+.logo{width:70px;height:70px;margin:0 auto 12px;border-radius:20px;background:linear-gradient(135deg,var(--primary),var(--pink));display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 40px rgba(99,102,241,.6);animation:logoPulse 3s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 40px rgba(99,102,241,.6)}50%{box-shadow:0 0 60px rgba(99,102,241,.9)}}
+h1{font-size:24px;font-weight:800;background:linear-gradient(135deg,#a5b4fc,#f0abfc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.subtitle{font-size:12px;color:var(--muted)}
+
+/* User Info */
+.user-info{display:none;text-align:center;padding:12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:14px;font-size:13px;color:var(--success);margin-bottom:16px;font-weight:700}
+.user-info.show{display:block;animation:fadeUp .3s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:16px;backdrop-filter:blur(15px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+
+/* Platforms */
+.platforms{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;justify-content:center}
+.chip{padding:8px 14px;border-radius:20px;background:rgba(99,102,241,.15);border:1px solid var(--border);color:#c7d2fe;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.chip:hover{background:rgba(99,102,241,.3);transform:translateY(-2px)}
+.chip.active{background:linear-gradient(135deg,var(--primary),var(--pink));color:#fff;border-color:transparent}
+
+/* Input */
+.url-input{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.url-input input{flex:1;min-width:200px;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;outline:none;transition:.2s;font-family:inherit}
+.url-input input:focus{border-color:var(--primary);box-shadow:0 0 20px rgba(99,102,241,.3)}
+.url-input input::placeholder{color:var(--muted)}
+.url-input button{padding:14px 22px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--pink));border:none;color:#fff;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;transition:.2s;white-space:nowrap}
+.url-input button:active{transform:scale(.96)}
+.url-input button:disabled{opacity:.5;cursor:not-allowed}
+
+.quality-select{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;outline:none;margin-bottom:14px;cursor:pointer;font-family:inherit}
+.quality-select:focus{border-color:var(--primary)}
+
+/* Progress */
+.progress{height:6px;background:rgba(99,102,241,.15);border-radius:3px;overflow:hidden;margin:14px 0;display:none}
+.progress.show{display:block}
+.progress .fill{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--accent),var(--pink));transition:width .3s;box-shadow:0 0 15px var(--primary)}
+
+/* Result */
+.result{display:none;padding:18px;background:var(--card-2);border:1px solid var(--border);border-radius:14px;margin-top:14px}
+.result.show{display:block;animation:fadeUp .3s}
+.result-header{display:flex;gap:12px;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.result-icon{font-size:40px}
+.result-info h3{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.result-info p{font-size:11px;color:var(--muted)}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;gap:10px}
+.info-row:last-child{border-bottom:none}
+.info-row .label{color:var(--muted);font-weight:600;flex-shrink:0}
+.info-row .value{color:var(--text);font-weight:700;max-width:65%;text-align:left;direction:ltr;font-size:11px;word-break:break-all}
+
+/* Actions */
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card-2);color:var(--text);font-weight:700;cursor:pointer;transition:.2s;font-size:12px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;justify-content:center;text-decoration:none;flex:1;min-width:140px}
+.btn:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 0 20px rgba(99,102,241,.3)}
+.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));border-color:transparent;color:#fff}
+.btn.success{background:linear-gradient(135deg,#10b981,#059669);border-color:transparent;color:#fff}
+.btn.warn{background:linear-gradient(135deg,#f59e0b,#d97706);border-color:transparent;color:#fff}
+
+/* Hint */
+.hint{padding:14px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);border-radius:12px;font-size:12px;color:#a5f3fc;line-height:1.8;margin-top:14px}
+.hint b{color:var(--accent)}
+
+/* Footer */
+.footer{text-align:center;font-size:10px;color:#4a5a7a;margin-top:20px;padding:14px}
+
+/* Toast */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:linear-gradient(135deg,var(--primary),var(--pink));border-radius:14px;padding:12px 20px;z-index:9999;opacity:0;transition:.3s;box-shadow:0 8px 30px rgba(99,102,241,.5);font-size:13px;font-weight:700;color:#fff;max-width:90vw;pointer-events:none;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Loading Dots */
+.loading{display:inline-flex;gap:4px;vertical-align:middle;margin-right:6px}
+.loading span{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce 1s infinite}
+.loading span:nth-child(2){animation-delay:.2s}
+.loading span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">💀</div>
+    <h1>Oktober Downloader</h1>
+    <div class="subtitle">تحميل الفيديوهات من كل المنصات</div>
+  </div>
+
+  <!-- User Info -->
+  <div class="user-info" id="userInfo"></div>
+
+  <!-- Main Card -->
+  <div class="card">
+    <!-- Platforms -->
+    <div class="platforms" id="platforms">
+      <button class="chip active" data-p="auto">🤖 تلقائي</button>
+      <button class="chip" data-p="youtube">▶️ يوتيوب</button>
+      <button class="chip" data-p="tiktok">🎵 تيك توك</button>
+      <button class="chip" data-p="facebook">📘 فيسبوك</button>
+      <button class="chip" data-p="instagram">📸 انستقرام</button>
+    </div>
+
+    <!-- URL Input -->
+    <div class="url-input">
+      <input id="url" type="text" placeholder="الصق رابط الفيديو هنا..." autocomplete="off">
+      <button id="downloadBtn">🔍 تحميل</button>
+    </div>
+
+    <!-- Quality -->
+    <select class="quality-select" id="quality">
+      <option value="1080">🎬 أفضل جودة (1080p)</option>
+      <option value="720">📺 720p</option>
+      <option value="480">📺 480p</option>
+      <option value="audio">🎵 صوت MP3</option>
+    </select>
+
+    <!-- Progress -->
+    <div class="progress" id="progress"><div class="fill" id="progressFill"></div></div>
+
+    <!-- Result -->
+    <div class="result" id="result"></div>
+
+    <!-- Hint -->
+    <div class="hint" id="hint">
+      💡 <b>كيف يعمل؟</b><br>
+      • الصق رابط من يوتيوب / تيك توك / فيسبوك / انستقرام<br>
+      • اضغط "تحميل"<br>
+      • الفيديو يظهر مع زر تحميل مباشر ✅
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    © 2026 Oktober • t.me/mskawyagming
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================
+// TELEGRAM WEBAPP
+// ============================================
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try {
+    tg.setHeaderColor("#0a0e27");
+    tg.setBackgroundColor("#0a0e27");
+  } catch(e) {}
+  
+  const user = tg.initDataUnsafe?.user;
+  if (user) {
+    const info = document.getElementById("userInfo");
+    info.textContent = "👋 مرحباً " + (user.first_name || "صديقي") + " — جاهز للتحميل!";
+    info.classList.add("show");
+  }
+}
+
+// ============================================
+// ELEMENTS
+// ============================================
+const $ = id => document.getElementById(id);
+const urlInput = $("url");
+const downloadBtn = $("downloadBtn");
+const qualitySelect = $("quality");
+const progress = $("progress");
+const progressFill = $("progressFill");
+const result = $("result");
+const toast = $("toast");
+const hint = $("hint");
+
+let currentPlatform = "auto";
+
+// ============================================
+// TOAST
+// ============================================
+function showToast(msg, duration = 2500) {
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove("show"), duration);
+}
+
+// ============================================
+// PLATFORM CHIPS
+// ============================================
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    currentPlatform = chip.dataset.p;
+  });
+});
+
+// ============================================
+// DETECT PLATFORM
+// ============================================
+function detectPlatform(url) {
+  if (/youtube\.com|youtu\.be/i.test(url)) return "youtube";
+  if (/tiktok\.com/i.test(url)) return "tiktok";
+  if (/facebook\.com|fb\.watch/i.test(url)) return "facebook";
+  if (/instagram\.com/i.test(url)) return "instagram";
+  if (/twitter\.com|x\.com/i.test(url)) return "twitter";
+  return "unknown";
+}
+
+function platformInfo(p) {
+  const map = {
+    youtube: { name: "يوتيوب", icon: "▶️" },
+    tiktok: { name: "تيك توك", icon: "🎵" },
+    facebook: { name: "فيسبوك", icon: "📘" },
+    instagram: { name: "انستقرام", icon: "📸" },
+    twitter: { name: "تويتر/X", icon: "🐦" },
+    unknown: { name: "موقع", icon: "🌐" }
+  };
+  return map[p] || map.unknown;
+}
+
+// ============================================
+// PROGRESS
+// ============================================
+function setProgress(pct) {
+  progress.classList.add("show");
+  progressFill.style.width = pct + "%";
+  if (pct >= 100) {
+    setTimeout(() => {
+      progress.classList.remove("show");
+      progressFill.style.width = "0%";
+    }, 1500);
+  }
+}
+
+// ============================================
+// DOWNLOAD
+// ============================================
+downloadBtn.addEventListener("click", doDownload);
+urlInput.addEventListener("keypress", e => { if (e.key === "Enter") doDownload(); });
+
+async function doDownload() {
+  const url = urlInput.value.trim();
+  if (!url) { showToast("⚠️ الصق رابط أولاً"); return; }
+  if (!/^https?:\/\//i.test(url)) { showToast("⚠️ رابط غير صالح"); return; }
+
+  const platform = currentPlatform === "auto" ? detectPlatform(url) : currentPlatform;
+  const info = platformInfo(platform);
+  const quality = qualitySelect.value;
+
+  downloadBtn.disabled = true;
+  result.classList.remove("show");
+  hint.style.display = "none";
+  setProgress(15);
+  showToast("🔍 جاري التحليل...");
+
+  try {
+    setProgress(40);
+    const data = await fetchFromServers(url, quality);
+    setProgress(90);
+
+    setTimeout(() => {
+      setProgress(100);
+      renderSuccess(data, info, url);
+      downloadBtn.disabled = false;
+      showToast("✅ تم!");
+    }, 300);
+  } catch (e) {
+    setProgress(100);
+    downloadBtn.disabled = false;
+    renderError(e.message, url);
+    showToast("⚠️ فشل التحميل", 3500);
+  }
+}
+
+// ============================================
+// FETCH FROM MULTIPLE SERVERS
+// ============================================
+async function fetchFromServers(url, quality) {
+  const qualityMap = { "1080": "1080", "720": "720", "480": "480", "audio": "audio" };
+
+  const body = {
+    url: url,
+    videoQuality: qualityMap[quality] || "1080",
+    downloadMode: quality === "audio" ? "audio" : "auto",
+    audioFormat: quality === "audio" ? "mp3" : "best"
+  };
+
+  // خوادم Cobalt متعددة (تجرب بالتتابع)
+  const servers = [
+    "https://api.cobalt.tools/",
+    "https://co.wuk.sh/api/json",
+    "https://cobalt-api.kwiatekmiki.com/"
+  ];
+
+  let lastError = "جميع الخوادم مشغولة";
+
+  for (const host of servers) {
+    try {
+      const res = await fetch(host, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        lastError = "HTTP " + res.status;
+        continue;
+      }
+
+      const data = await res.json();
+
+      if (data.status === "error") {
+        lastError = data.error?.code || "خطأ من الخادم";
+        continue;
+      }
+
+      if (data.url) {
+        return {
+          title: data.title || "فيديو",
+          author: data.author || "غير معروف",
+          duration: data.duration || "—",
+          thumbnail: data.thumbnail || "",
+          downloadUrl: data.url,
+          audioUrl: data.audio || null
+        };
+      }
+    } catch (e) {
+      lastError = e.message;
+      continue;
+    }
+  }
+
+  throw new Error(lastError);
+}
+
+// ============================================
+// RENDER
+// ============================================
+function renderSuccess(data, info, originalUrl) {
+  result.classList.add("show");
+  result.innerHTML = `
+    <div class="result-header">
+      <div class="result-icon">${info.icon}</div>
+      <div class="result-info">
+        <h3>${info.name} — جاهز ✅</h3>
+        <p>تم التحميل بنجاح</p>
+      </div>
+    </div>
+
+    ${data.thumbnail ? `<img src="${data.thumbnail}" style="width:100%;border-radius:12px;margin-bottom:14px;max-height:200px;object-fit:cover" onerror="this.style.display='none'">` : ''}
+
+    <div class="info-row"><span class="label">🎬 العنوان</span><span class="value">${escapeHtml(data.title)}</span></div>
+    <div class="info-row"><span class="label">👤 القناة</span><span class="value">${escapeHtml(data.author)}</span></div>
+    <div class="info-row"><span class="label">⏱️ المدة</span><span class="value">${escapeHtml(String(data.duration))}</span></div>
+
+    <div class="actions">
+      <a class="btn primary" href="${escapeAttr(data.downloadUrl)}" target="_blank" rel="noopener">⬇️ تحميل الفيديو</a>
+      ${data.audioUrl ? `<a class="btn success" href="${escapeAttr(data.audioUrl)}" target="_blank" rel="noopener">🎵 تحميل الصوت</a>` : ''}
+      <button class="btn" onclick="copyLink('${escapeAttr(data.downloadUrl)}')">📋 نسخ الرابط</button>
+      <a class="btn warn" href="${escapeAttr(originalUrl)}" target="_blank" rel="noopener">🔗 الرابط الأصلي</a>
+    </div>
+  `;
+}
+
+function renderError(msg, url) {
+  result.classList.add("show");
+  result.innerHTML = `
+    <div class="result-header">
+      <div class="result-icon">⚠️</div>
+      <div class="result-info">
+        <h3>فشل التحميل</h3>
+        <p>${escapeHtml(msg)}</p>
+      </div>
+    </div>
+    <div style="padding:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:12px;font-size:12px;color:#fbbf24;line-height:1.7;margin-bottom:14px">
+      💡 <b>نصائح:</b><br>
+      • جرب رابطاً آخر<br>
+      • انتظر دقيقة وأعد المحاولة<br>
+      • الخوادم المجانية قد تكون مشغولة
+    </div>
+    <div class="actions">
+      <button class="btn primary" onclick="doDownload()">🔄 إعادة المحاولة</button>
+      <a class="btn" href="${escapeAttr(url)}" target="_blank" rel="noopener">🔗 فتح الرابط</a>
+    </div>
+  `;
+}
+
+// ============================================
+// COPY
+// ============================================
+window.copyLink = (text) => {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast("✅ تم النسخ")).catch(fallback);
+  } else fallback();
+
+  function fallback() {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); showToast("✅ تم النسخ"); } catch(e){}
+    document.body.removeChild(ta);
+  }
+};
+
+// ============================================
+// HELPERS
+// ============================================
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+function escapeAttr(s) {
+  return String(s).replace(/'/g, "%27").replace(/"/g, "%22");
+}
+
+// ============================================
+// INIT
+// ============================================
+console.log("%c💀 Oktober Downloader", "color:#a5b4fc;font-size:20px;font-weight:bold");
+console.log("%c🚀 Cobalt API + Telegram WebApp", "color:#f0abfc;font-size:13px");
+</script>
+</body>
+</html>
