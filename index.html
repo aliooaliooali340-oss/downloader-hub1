@@ -1,445 +1,2399 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💀 Oktober Downloader</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
-:root{
-  --primary:#6366f1;--primary-2:#8b5cf6;--accent:#22d3ee;--pink:#ec4899;
-  --bg:#0a0e27;--card:rgba(20,25,56,.9);--card-2:rgba(30,37,80,.7);
-  --text:#f1f5f9;--muted:#94a3b8;--border:rgba(99,102,241,.25);
-  --success:#10b981;--warn:#f59e0b;--danger:#ef4444;
-}
-body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;position:relative}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 15% 20%,rgba(99,102,241,.18) 0%,transparent 45%),radial-gradient(circle at 85% 75%,rgba(236,72,153,.15) 0%,transparent 45%),radial-gradient(circle at 50% 50%,rgba(34,211,238,.08) 0%,transparent 60%);z-index:-2;pointer-events:none}
-body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(99,102,241,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.05) 1px,transparent 1px);background-size:40px 40px;z-index:-1;pointer-events:none;animation:gridMove 30s linear infinite}
-@keyframes gridMove{to{background-position:40px 40px}}
-.wrap{max-width:900px;margin:0 auto;padding:20px 14px 100px;position:relative}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0e0d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>TxtVault</title>
 
-/* Header */
-.header{text-align:center;margin-bottom:24px}
-.logo{width:70px;height:70px;margin:0 auto 12px;border-radius:20px;background:linear-gradient(135deg,var(--primary),var(--pink));display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 40px rgba(99,102,241,.6);animation:logoPulse 3s ease-in-out infinite}
-@keyframes logoPulse{0%,100%{box-shadow:0 0 40px rgba(99,102,241,.6)}50%{box-shadow:0 0 60px rgba(99,102,241,.9)}}
-h1{font-size:24px;font-weight:800;background:linear-gradient(135deg,#a5b4fc,#f0abfc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
-.subtitle{font-size:12px;color:var(--muted)}
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-/* User Info */
-.user-info{display:none;text-align:center;padding:12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:14px;font-size:13px;color:var(--success);margin-bottom:16px;font-weight:700}
-.user-info.show{display:block;animation:fadeUp .3s}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
 
-/* Card */
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:16px;backdrop-filter:blur(15px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
 
-/* Platforms */
-.platforms{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;justify-content:center}
-.chip{padding:8px 14px;border-radius:20px;background:rgba(99,102,241,.15);border:1px solid var(--border);color:#c7d2fe;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
-.chip:hover{background:rgba(99,102,241,.3);transform:translateY(-2px)}
-.chip.active{background:linear-gradient(135deg,var(--primary),var(--pink));color:#fff;border-color:transparent}
+        :root {
+            --green: #00c853;
+            --green-bright: #69f0ae;
+            --green-dark: #009940;
+            --green-glow: rgba(0, 200, 83, 0.35);
+            --red: #ff5252;
+            --blue: #4a90e2;
+            --bg: #0a0e0d;
+            --card: #161c1a;
+            --card-hover: #1c2320;
+            --border: rgba(0, 200, 83, 0.12);
+            --border-hover: rgba(0, 200, 83, 0.35);
+            --text: #ffffff;
+            --text-dim: #8a9694;
+            --text-muted: #5a6462;
+            --radius-xl: 22px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            --glow: 0 0 20px rgba(0, 200, 83, 0.3);
+        }
 
-/* Input */
-.url-input{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.url-input input{flex:1;min-width:200px;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;outline:none;transition:.2s;font-family:inherit}
-.url-input input:focus{border-color:var(--primary);box-shadow:0 0 20px rgba(99,102,241,.3)}
-.url-input input::placeholder{color:var(--muted)}
-.url-input button{padding:14px 22px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--pink));border:none;color:#fff;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;transition:.2s;white-space:nowrap}
-.url-input button:active{transform:scale(.96)}
-.url-input button:disabled{opacity:.5;cursor:not-allowed}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Noto Kufi Arabic', sans-serif;
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(0, 200, 83, 0.06), transparent 40%),
+                radial-gradient(circle at 85% 90%, rgba(0, 200, 83, 0.04), transparent 40%);
+            background-attachment: fixed;
+            padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+            color: var(--text);
+            direction: rtl;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            -webkit-font-smoothing: antialiased;
+            -webkit-overflow-scrolling: touch;
+            overflow-x: hidden;
+        }
 
-.quality-select{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;outline:none;margin-bottom:14px;cursor:pointer;font-family:inherit}
-.quality-select:focus{border-color:var(--primary)}
+        /* Inputs - iOS anti-zoom (font-size >= 16px) */
+        input, textarea, select, button {
+            font-size: max(16px, 1rem);
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+        }
 
-/* Progress */
-.progress{height:6px;background:rgba(99,102,241,.15);border-radius:3px;overflow:hidden;margin:14px 0;display:none}
-.progress.show{display:block}
-.progress .fill{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--accent),var(--pink));transition:width .3s;box-shadow:0 0 15px var(--primary)}
+        input, textarea {
+            transform: translateZ(0);
+        }
 
-/* Result */
-.result{display:none;padding:18px;background:var(--card-2);border:1px solid var(--border);border-radius:14px;margin-top:14px}
-.result.show{display:block;animation:fadeUp .3s}
-.result-header{display:flex;gap:12px;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.result-icon{font-size:40px}
-.result-info h3{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:4px}
-.result-info p{font-size:11px;color:var(--muted)}
-.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;gap:10px}
-.info-row:last-child{border-bottom:none}
-.info-row .label{color:var(--muted);font-weight:600;flex-shrink:0}
-.info-row .value{color:var(--text);font-weight:700;max-width:65%;text-align:left;direction:ltr;font-size:11px;word-break:break-all}
+        .dev-credit {
+            position: fixed;
+            bottom: max(14px, env(safe-area-inset-bottom));
+            left: max(14px, env(safe-area-inset-left));
+            background: rgba(0, 200, 83, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            color: var(--green-bright);
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--glow);
+            z-index: 7777;
+            transition: all 0.2s;
+        }
 
-/* Actions */
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.btn{padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card-2);color:var(--text);font-weight:700;cursor:pointer;transition:.2s;font-size:12px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;justify-content:center;text-decoration:none;flex:1;min-width:140px}
-.btn:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 0 20px rgba(99,102,241,.3)}
-.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));border-color:transparent;color:#fff}
-.btn.success{background:linear-gradient(135deg,#10b981,#059669);border-color:transparent;color:#fff}
-.btn.warn{background:linear-gradient(135deg,#f59e0b,#d97706);border-color:transparent;color:#fff}
+        .dev-credit:hover { transform: translateY(-2px); }
+        .dev-credit:active { transform: scale(0.95); }
 
-/* Hint */
-.hint{padding:14px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);border-radius:12px;font-size:12px;color:#a5f3fc;line-height:1.8;margin-top:14px}
-.hint b{color:var(--accent)}
+        .dev-credit .dot {
+            width: 6px; height: 6px;
+            background: var(--green-bright);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--green-bright);
+            animation: pulse 1.6s ease-in-out infinite;
+        }
 
-/* Footer */
-.footer{text-align:center;font-size:10px;color:#4a5a7a;margin-top:20px;padding:14px}
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
 
-/* Toast */
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:linear-gradient(135deg,var(--primary),var(--pink));border-radius:14px;padding:12px 20px;z-index:9999;opacity:0;transition:.3s;box-shadow:0 8px 30px rgba(99,102,241,.5);font-size:13px;font-weight:700;color:#fff;max-width:90vw;pointer-events:none;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+        /* ============================================
+           Auth
+           ============================================ */
+        .auth-wrapper {
+            max-width: 420px;
+            width: 100%;
+            margin: auto;
+            margin-top: 20px;
+            padding-bottom: 80px;
+        }
 
-/* Loading Dots */
-.loading{display:inline-flex;gap:4px;vertical-align:middle;margin-right:6px}
-.loading span{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce 1s infinite}
-.loading span:nth-child(2){animation-delay:.2s}
-.loading span:nth-child(3){animation-delay:.4s}
-@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-</style>
+        .auth-card {
+            background: var(--card);
+            border-radius: var(--radius-xl);
+            padding: 32px 22px 26px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(0, 200, 83, 0.10), transparent 50%);
+            pointer-events: none;
+        }
+
+        .auth-card > * { position: relative; z-index: 1; }
+
+        .auth-header { text-align: center; margin-bottom: 24px; }
+
+        .auth-header .logo-box {
+            width: 68px; height: 68px;
+            margin: 0 auto 14px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--green-dark), var(--green), var(--green-bright));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 0 30px var(--green-glow);
+            animation: floatIcon 3.5s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .auth-header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.4px;
+        }
+
+        .auth-header .subtitle {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 7px;
+            color: var(--text-muted);
+            transition: 0.25s;
+            user-select: none;
+        }
+
+        .auth-tab.active {
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            color: #000;
+            box-shadow: 0 0 12px var(--green-glow);
+        }
+
+        .auth-form-group { margin-bottom: 14px; }
+
+        .auth-form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--green-bright);
+            margin-bottom: 6px;
+            padding-right: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-form-group input,
+        .profile-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            transition: 0.25s;
+            background: rgba(0, 0, 0, 0.4);
+            font-family: inherit;
+            color: var(--text);
+        }
+
+        .auth-form-group input[dir="ltr"],
+        .profile-input[dir="ltr"] {
+            direction: ltr;
+            text-align: left;
+        }
+
+        .auth-form-group input::placeholder,
+        .profile-input::placeholder { color: var(--text-muted); }
+
+        .auth-form-group input:focus,
+        .profile-input:focus {
+            outline: none;
+            border-color: var(--green);
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 3px var(--green-glow);
+        }
+
+        .input-wrapper input.has-eye {
+            padding-left: 46px;
+        }
+
+        .eye-btn {
+            position: absolute;
+            left: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 38px;
+            height: 38px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .eye-btn:hover { background: rgba(0, 200, 83, 0.1); color: var(--green-bright); }
+        .eye-btn:active { transform: translateY(-50%) scale(0.9); }
+
+        /* Password Strength */
+        .pass-strength {
+            margin-top: 6px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding-right: 4px;
+        }
+
+        .pass-strength .bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .pass-strength .bar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            width: 0%;
+            background: var(--red);
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .pass-strength.weak .bar::after { width: 33%; background: var(--red); }
+        .pass-strength.medium .bar::after { width: 66%; background: #ffab00; }
+        .pass-strength.strong .bar::after { width: 100%; background: var(--green); }
+
+        .pass-strength .txt {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            min-width: 50px;
+            text-align: left;
+            direction: rtl;
+        }
+
+        .pass-strength.weak .txt { color: var(--red); }
+        .pass-strength.medium .txt { color: #ffab00; }
+        .pass-strength.strong .txt { color: var(--green); }
+
+        .suggest-pass-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            background: rgba(0, 200, 83, 0.08);
+            border: 1px dashed var(--border-hover);
+            border-radius: var(--radius-md);
+            color: var(--green-bright);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .suggest-pass-btn:hover { background: rgba(0, 200, 83, 0.15); }
+        .suggest-pass-btn:active { transform: scale(0.97); }
+
+        .auth-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding-right: 4px;
+            user-select: none;
+        }
+
+        .auth-checkbox input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--green); flex-shrink: 0; }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .auth-btn:active { transform: scale(0.97); }
+        .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .auth-btn.primary {
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 0 20px var(--green-glow);
+        }
+
+        .auth-btn.primary:hover { box-shadow: 0 0 30px var(--green-glow); }
+
+        .auth-btn.google {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1f2e;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .auth-link {
+            text-align: center;
+            font-size: 13px;
+            color: var(--green-bright);
+            cursor: pointer;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .auth-link:hover { text-decoration: underline; }
+
+        .auth-divider {
+            text-align: center;
+            margin: 16px 0;
+            font-size: 12px;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .auth-divider::before { right: 0; }
+        .auth-divider::after { left: 0; }
+
+        .auth-msg {
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: none;
+            border: 1px solid;
+        }
+
+        .auth-msg.show { display: block; }
+        .auth-msg.error { background: rgba(255, 82, 82, 0.1); color: var(--red); border-color: rgba(255, 82, 82, 0.3); }
+        .auth-msg.success { background: rgba(0, 200, 83, 0.1); color: var(--green-bright); border-color: var(--border-hover); }
+
+        .auth-loader { display: none; text-align: center; padding: 10px; }
+        .auth-loader.show { display: block; }
+        .auth-loader .spin {
+            width: 26px; height: 26px;
+            border: 3px solid var(--border);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .footer-note {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 18px;
+        }
+
+        /* ============================================
+           Dashboard
+           ============================================ */
+        #dashboardView { display: none; width: 100%; max-width: 780px; padding-bottom: 90px; }
+
+        .container {
+            max-width: 780px;
+            width: 100%;
+            background: var(--card);
+            border-radius: var(--radius-xl);
+            padding: 18px 16px 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+        .topbar-left .icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--green-dark), var(--green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: var(--glow);
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .topbar-left h1 { font-size: 16px; font-weight: 800; color: var(--text); }
+        .topbar-left .sub { font-size: 11px; color: var(--text-dim); font-weight: 500; display: block; margin-top: 1px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 6px; }
+
+        .icon-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: var(--card-hover);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--green-bright);
+            transition: 0.2s;
+        }
+
+        .icon-btn:hover { background: rgba(0, 200, 83, 0.15); border-color: var(--border-hover); }
+        .icon-btn:active { transform: scale(0.92); }
+
+        .profile-btn {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--glow);
+            flex-shrink: 0;
+        }
+
+        .profile-btn:active { transform: scale(0.92); }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--card-hover);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover { border-color: var(--border-hover); background: rgba(0, 200, 83, 0.08); }
+        .action-btn:active { transform: scale(0.97); }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            color: #000;
+            border-color: transparent;
+            box-shadow: 0 0 15px var(--green-glow);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--card-hover);
+            border-radius: var(--radius-md);
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card .num {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--green-bright);
+            line-height: 1.1;
+            text-shadow: 0 0 15px rgba(105, 240, 174, 0.3);
+        }
+
+        .stat-card .label { font-size: 10px; font-weight: 600; color: var(--text-dim); margin-top: 3px; }
+
+        .welcome-box {
+            background: var(--card-hover);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .welcome-box .greeting {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .welcome-box .greeting .wave {
+            font-size: 22px;
+            animation: wave 2s ease-in-out infinite;
+            display: inline-block;
+            transform-origin: 70% 70%;
+        }
+
+        @keyframes wave {
+            0%, 60%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(14deg); }
+            20% { transform: rotate(-8deg); }
+        }
+
+        .welcome-box .plan-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            color: #000;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 800;
+            box-shadow: 0 0 15px var(--green-glow);
+        }
+
+        .create-card {
+            background: var(--card-hover);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .create-card h3 {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--green-bright);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-title-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            font-family: inherit;
+            color: var(--text);
+        }
+
+        .note-title-input::placeholder { color: var(--text-muted); }
+
+        .note-title-input:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px var(--green-glow);
+        }
+
+        textarea.note-input {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--text);
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        textarea.note-input::placeholder { color: var(--text-muted); }
+
+        textarea.note-input:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px var(--green-glow);
+        }
+
+        .char-counter {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: left;
+            margin-bottom: 10px;
+            padding-right: 4px;
+        }
+
+        .char-counter #charCount { color: var(--green-bright); font-weight: 800; }
+
+        .btn {
+            padding: 13px 22px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 0 20px var(--green-glow);
+            width: 100%;
+        }
+
+        .table-wrapper {
+            background: var(--card-hover);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 70px 110px 120px;
+            padding: 14px 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-header .th-actions,
+        .table-header .th-views,
+        .table-header .th-date { text-align: center; }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 70px 110px 120px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .table-row:last-child { border-bottom: none; }
+        .table-row:hover { background: rgba(0, 200, 83, 0.04); }
+
+        .table-row .td-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .table-row .td-title .title-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: rgba(0, 200, 83, 0.1);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            color: var(--green-bright);
+        }
+
+        .table-row .td-title .title-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+
+        .table-row .td-views {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .table-row .td-date {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .table-row .td-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .act-btn {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: transparent;
+            font-family: inherit;
+            padding: 0;
+        }
+
+        .act-btn:active { transform: scale(0.9); }
+
+        .act-btn.stats { border-color: rgba(74, 144, 226, 0.3); color: var(--blue); background: rgba(74, 144, 226, 0.08); }
+        .act-btn.edit { border-color: rgba(0, 200, 83, 0.3); color: var(--green-bright); background: rgba(0, 200, 83, 0.08); }
+        .act-btn.delete { border-color: rgba(255, 82, 82, 0.3); color: var(--red); background: rgba(255, 82, 82, 0.08); }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 8px 0;
+        }
+
+        .page-btn {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--card-hover);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .page-btn:hover { border-color: var(--border-hover); background: rgba(0, 200, 83, 0.08); }
+        .page-btn:active { transform: scale(0.95); }
+        .page-btn.active {
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            color: #000;
+            border-color: transparent;
+            box-shadow: 0 0 15px var(--green-glow);
+        }
+        .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .empty-state .big-icon { font-size: 56px; display: block; margin-bottom: 12px; opacity: 0.4; }
+        .empty-state p { font-size: 14px; }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: #fff;
+            padding: 13px 22px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            text-align: center;
+            max-width: 90%;
+            border: 1px solid var(--border);
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .loader { display: none; text-align: center; padding: 16px 0; }
+        .loader.show { display: block; }
+        .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
+
+        .result-box {
+            margin-top: 12px;
+            display: none;
+            background: rgba(0, 200, 83, 0.08);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-hover);
+        }
+
+        .result-box.show { display: block; }
+        .result-box .title { font-weight: 700; color: var(--green-bright); margin-bottom: 6px; font-size: 14px; }
+        .result-box .link-display {
+            font-size: 12px;
+            color: var(--text);
+            word-break: break-all;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            margin: 6px 0;
+            direction: ltr;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-family: 'SF Mono', Consolas, monospace;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 8000;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: var(--card);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 440px;
+            padding: 22px;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 { font-size: 18px; font-weight: 800; color: var(--text); }
+
+        .modal-close {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--card-hover);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--green-bright);
+        }
+
+        .modal-close:active { transform: scale(0.92); }
+
+        .avatar-big {
+            width: 84px; height: 84px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 36px;
+            font-weight: 800;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 30px var(--green-glow);
+        }
+
+        .profile-section {
+            background: var(--card-hover);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .profile-section h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--green-bright);
+            margin-bottom: 10px;
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .profile-row:last-child { border-bottom: none; }
+
+        .profile-row .key { color: var(--text-muted); font-weight: 600; }
+        .profile-row .val { color: var(--text); font-weight: 700; word-break: break-all; text-align: left; direction: ltr; }
+
+        .modal-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            transition: 0.2s;
+        }
+
+        .modal-btn:active { transform: scale(0.97); }
+
+        .modal-btn.primary {
+            background: linear-gradient(135deg, var(--green), var(--green-bright));
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 0 15px var(--green-glow);
+        }
+
+        .modal-btn.danger {
+            background: rgba(255, 82, 82, 0.1);
+            color: var(--red);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+        }
+
+        .edit-title { font-size: 16px; font-weight: 800; color: var(--green-bright); margin-bottom: 4px; }
+        .edit-meta { font-size: 12px; color: var(--text-dim); margin-bottom: 14px; }
+
+        .edit-content {
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--text);
+            line-height: 1.7;
+            margin-bottom: 10px;
+            resize: vertical;
+        }
+
+        .edit-content:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px var(--green-glow);
+        }
+
+        .stats-modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stats-modal-item {
+            background: var(--card-hover);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stats-modal-item .val {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--green-bright);
+            text-shadow: 0 0 15px rgba(105, 240, 174, 0.3);
+        }
+
+        .stats-modal-item .lbl { font-size: 11px; color: var(--text-dim); font-weight: 600; margin-top: 4px; }
+
+        .stats-share-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .stats-share-box .lbl { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+        .stats-share-box .lnk {
+            font-size: 12px;
+            color: var(--green-bright);
+            word-break: break-all;
+            font-family: 'SF Mono', Consolas, monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        /* ============================================
+           Responsive
+           ============================================ */
+
+        /* Tablet */
+        @media (max-width: 768px) {
+            .table-header, .table-row {
+                grid-template-columns: 1fr 60px 100px 110px;
+                padding: 12px 12px;
+            }
+        }
+
+        /* Mobile Large */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+
+            .auth-card { padding: 26px 18px 22px; }
+            .auth-header h1 { font-size: 20px; }
+            .auth-header .logo-box { width: 62px; height: 62px; font-size: 28px; }
+
+            .container { padding: 14px 12px 20px; }
+            .topbar-left h1 { font-size: 15px; }
+            .stat-card .num { font-size: 18px; }
+            .stat-card .label { font-size: 9px; }
+
+            .welcome-box .greeting { font-size: 17px; }
+            .action-btn { min-width: 100px; font-size: 12px; padding: 10px 12px; }
+
+            .table-header, .table-row {
+                grid-template-columns: 1fr 55px 90px 105px;
+                padding: 10px 10px;
+            }
+            .table-header { font-size: 10px; }
+            .table-row .td-title .title-icon { width: 28px; height: 28px; font-size: 12px; }
+            .table-row .td-title .title-text { font-size: 12px; }
+            .table-row .td-views { font-size: 13px; }
+            .table-row .td-date { font-size: 10px; }
+            .act-btn { width: 30px; height: 30px; font-size: 12px; }
+
+            .modal { padding: 18px; border-radius: 20px; }
+            .modal-header h2 { font-size: 16px; }
+
+            .pagination { gap: 4px; }
+            .page-btn { min-width: 34px; height: 34px; font-size: 12px; padding: 0 8px; }
+        }
+
+        /* Mobile Small */
+        @media (max-width: 400px) {
+            body { padding: 8px; }
+
+            .auth-card { padding: 22px 16px 20px; border-radius: 18px; }
+            .auth-header h1 { font-size: 18px; }
+            .auth-header .subtitle { font-size: 12px; }
+            .auth-header .logo-box { width: 56px; height: 56px; font-size: 26px; border-radius: 16px; }
+
+            .auth-form-group input, .profile-input { padding: 13px 14px; font-size: 16px; }
+            .auth-tab { padding: 9px 6px; font-size: 12px; }
+
+            .container { padding: 12px 10px 16px; border-radius: 18px; }
+            .topbar-left .icon { width: 38px; height: 38px; font-size: 18px; }
+            .topbar-left h1 { font-size: 14px; }
+            .profile-btn { width: 38px; height: 38px; font-size: 14px; }
+            .icon-btn { width: 36px; height: 36px; font-size: 14px; }
+
+            .action-row { gap: 6px; }
+            .action-btn { min-width: 90px; font-size: 11px; padding: 9px 10px; }
+
+            .stats-grid { gap: 6px; }
+            .stat-card { padding: 10px 6px; }
+            .stat-card .num { font-size: 16px; }
+
+            .welcome-box { padding: 12px; }
+            .welcome-box .greeting { font-size: 15px; }
+            .welcome-box .plan-badge { padding: 4px 10px; font-size: 10px; }
+
+            .create-card { padding: 12px; }
+            .create-card h3 { font-size: 13px; }
+
+            .table-header, .table-row {
+                grid-template-columns: 1fr 45px 75px 95px;
+                padding: 9px 8px;
+            }
+            .table-header { font-size: 9px; }
+            .table-row .td-title .title-icon { width: 26px; height: 26px; font-size: 11px; border-radius: 6px; }
+            .table-row .td-title .title-text { font-size: 11px; }
+            .table-row .td-views { font-size: 12px; }
+            .table-row .td-date { font-size: 9px; }
+            .table-row .td-actions { gap: 3px; }
+            .act-btn { width: 26px; height: 26px; font-size: 10px; border-radius: 6px; }
+
+            .pagination { gap: 3px; }
+            .page-btn { min-width: 30px; height: 30px; font-size: 11px; padding: 0 6px; }
+
+            .modal { padding: 16px; }
+            .avatar-big { width: 70px; height: 70px; font-size: 30px; }
+            .profile-section { padding: 12px; }
+
+            .dev-credit { font-size: 10px; padding: 6px 10px; }
+        }
+
+        /* Landscape mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .auth-wrapper { margin-top: 10px; }
+            .auth-card { padding: 20px 18px; }
+            .auth-header { margin-bottom: 16px; }
+            .auth-header .logo-box { width: 50px; height: 50px; font-size: 24px; margin-bottom: 8px; }
+        }
+
+        /* Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+
+        /* Focus visible for a11y */
+        :focus-visible {
+            outline: 2px solid var(--green-bright);
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="wrap">
-  <!-- Header -->
-  <div class="header">
-    <div class="logo">💀</div>
-    <h1>Oktober Downloader</h1>
-    <div class="subtitle">تحميل الفيديوهات من كل المنصات</div>
-  </div>
+    <!-- ============================================
+         Auth View
+         ============================================ -->
+    <div id="authView" class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo-box">🔐</div>
+                <h1>TxtVault</h1>
+                <div class="subtitle">📝 احفظ نصوصك وشاركها برابط واحد</div>
+            </div>
 
-  <!-- User Info -->
-  <div class="user-info" id="userInfo"></div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tabLogin">🔐 دخول</div>
+                <div class="auth-tab" id="tabSignup">✨ حساب جديد</div>
+            </div>
 
-  <!-- Main Card -->
-  <div class="card">
-    <!-- Platforms -->
-    <div class="platforms" id="platforms">
-      <button class="chip active" data-p="auto">🤖 تلقائي</button>
-      <button class="chip" data-p="youtube">▶️ يوتيوب</button>
-      <button class="chip" data-p="tiktok">🎵 تيك توك</button>
-      <button class="chip" data-p="facebook">📘 فيسبوك</button>
-      <button class="chip" data-p="instagram">📸 انستقرام</button>
+            <div class="auth-msg" id="authMsg"></div>
+
+            <!-- Login -->
+            <form id="loginForm" autocomplete="on" onsubmit="return false;">
+                <div class="auth-form-group">
+                    <label>📧 البريد الإلكتروني</label>
+                    <input 
+                        type="email" 
+                        id="loginEmail" 
+                        name="email"
+                        placeholder="your@email.com" 
+                        autocomplete="username email"
+                        inputmode="email"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        spellcheck="false">
+                </div>
+                <div class="auth-form-group">
+                    <label>🔒 كلمة السر</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="loginPassword" 
+                            name="password"
+                            class="has-eye"
+                            placeholder="••••••••" 
+                            autocomplete="current-password"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            spellcheck="false">
+                        <button type="button" class="eye-btn" data-target="loginPassword" aria-label="عرض كلمة السر">👁️</button>
+                    </div>
+                </div>
+                <label class="auth-checkbox">
+                    <input type="checkbox" id="rememberMe" checked>
+                    <span>💾 تذكرني في هذا الجهاز</span>
+                </label>
+                <button type="button" class="auth-btn primary" id="loginBtn">🔐 تسجيل الدخول</button>
+                <div class="auth-link" id="forgotBtn">🔑 نسيت كلمة السر؟</div>
+            </form>
+
+            <!-- Signup -->
+            <form id="signupForm" autocomplete="on" onsubmit="return false;" style="display:none;">
+                <div class="auth-form-group">
+                    <label>📧 البريد الإلكتروني</label>
+                    <input 
+                        type="email" 
+                        id="signupEmail" 
+                        name="email"
+                        placeholder="your@email.com" 
+                        autocomplete="username email"
+                        inputmode="email"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        spellcheck="false">
+                </div>
+                <div class="auth-form-group">
+                    <label>🔒 كلمة السر <span style="font-weight:400;color:#5a6462;font-size:11px;">(6+ أحرف)</span></label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="signupPassword" 
+                            name="new-password"
+                            class="has-eye"
+                            placeholder="••••••••" 
+                            autocomplete="new-password"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            spellcheck="false"
+                            minlength="6"
+                            maxlength="64">
+                        <button type="button" class="eye-btn" data-target="signupPassword" aria-label="عرض كلمة السر">👁️</button>
+                    </div>
+                    <div class="pass-strength" id="passStrength">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="txt" id="passStrengthTxt">—</div>
+                    </div>
+                    <button type="button" class="suggest-pass-btn" id="suggestPassBtn">✨ اقترح كلمة سر قوية تلقائياً</button>
+                </div>
+                <div class="auth-form-group">
+                    <label>🔒 تأكيد كلمة السر</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="signupPasswordConfirm" 
+                            name="new-password-confirm"
+                            class="has-eye"
+                            placeholder="••••••••" 
+                            autocomplete="new-password"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            spellcheck="false">
+                        <button type="button" class="eye-btn" data-target="signupPasswordConfirm" aria-label="عرض كلمة السر">👁️</button>
+                    </div>
+                </div>
+                <button type="button" class="auth-btn primary" id="signupBtn">✨ إنشاء حساب</button>
+            </form>
+
+            <div class="auth-divider">أو</div>
+
+            <button type="button" class="auth-btn google" id="googleBtn">
+                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.1-11.3-7.6l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.6l6.2 5.2C41 35.7 44 30.2 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+                🌐 الدخول بجوجل
+            </button>
+
+            <div class="auth-loader" id="authLoader"><div class="spin"></div></div>
+
+            <div class="footer-note">🔒 محمي بتشفير آمن</div>
+        </div>
     </div>
 
-    <!-- URL Input -->
-    <div class="url-input">
-      <input id="url" type="text" placeholder="الصق رابط الفيديو هنا..." autocomplete="off">
-      <button id="downloadBtn">🔍 تحميل</button>
+    <!-- ============================================
+         Dashboard
+         ============================================ -->
+    <div id="dashboardView" class="container" style="display:none;">
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="icon">🔐</div>
+                <div>
+                    <h1>TxtVault</h1>
+                    <span class="sub">قبو النصوص</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button type="button" class="icon-btn" id="refreshBtn" title="تحديث" aria-label="تحديث">🔄</button>
+                <button type="button" class="profile-btn" id="profileBtn" aria-label="الملف الشخصي">؟</button>
+            </div>
+        </div>
+
+        <div class="action-row">
+            <button type="button" class="action-btn primary" id="scrollToCreateBtn">➕ نص جديد</button>
+            <button type="button" class="action-btn" id="myNotesBtn">📁 نصوصي</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="num" id="totalNotes">0</div>
+                <div class="label">📝 النصوص</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="totalViews">0</div>
+                <div class="label">👁️ المشاهدات</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="totalChars">0</div>
+                <div class="label">🔤 الأحرف</div>
+            </div>
+        </div>
+
+        <div class="welcome-box">
+            <div class="greeting">
+                <span class="wave">👋</span>
+                <span>Welcome, <span id="welcomeName">—</span></span>
+            </div>
+            <div class="plan-badge" id="planBadge">🔓 FREE</div>
+        </div>
+
+        <div class="create-card" id="createCard">
+            <h3>➕ حفظ نص جديد</h3>
+            <input type="text" id="noteTitleInput" class="note-title-input" placeholder="📌 عنوان النص (اختياري)" maxlength="60" autocomplete="off">
+            <textarea id="noteContentInput" class="note-input" placeholder="✍️ اكتب أو الصق النص هنا..." maxlength="50000" autocomplete="off" spellcheck="false"></textarea>
+            <div class="char-counter"><span id="charCount">0</span> / 50000 حرف</div>
+            <button type="button" class="btn btn-primary" id="saveNoteBtn">💾 حفظ ومشاركة</button>
+
+            <div id="saveLoader" class="loader">
+                <div class="spinner"></div>
+                <span style="color:var(--text-dim);font-size:13px;">⏳ جاري الحفظ...</span>
+            </div>
+
+            <div class="result-box" id="newNoteResult">
+                <div class="title">✅ تم الحفظ بنجاح!</div>
+                <div class="link-display" id="generatedLinkDisplay"></div>
+                <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                    <button type="button" class="btn" style="background:rgba(0,200,83,0.12);color:var(--green-bright);border:1px solid var(--border);padding:8px 14px;font-size:12px;" id="copyNewLinkBtn">📋 نسخ</button>
+                    <button type="button" class="btn" style="background:rgba(0,200,83,0.12);color:var(--green-bright);border:1px solid var(--border);padding:8px 14px;font-size:12px;" id="openNewLinkBtn">🔗 فتح</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size:15px;font-weight:700;color:var(--text);margin:0 0 10px 0;display:flex;align-items:center;gap:8px;padding-right:4px;">
+            🚀 نصوصي
+            <span class="badge" id="notesCount" style="background:linear-gradient(135deg,var(--green-dark),var(--green));color:#000;font-size:11px;padding:2px 10px;border-radius:40px;font-weight:800;">0</span>
+        </div>
+
+        <div class="table-wrapper" id="tableWrapper">
+            <div class="table-header">
+                <div>📄 العنوان</div>
+                <div class="th-views">👁️</div>
+                <div class="th-date">📅 التاريخ</div>
+                <div class="th-actions">⚙️ إجراءات</div>
+            </div>
+
+            <div id="tableBody">
+                <div class="empty-state">
+                    <span class="big-icon">📭</span>
+                    <p>لا توجد نصوص بعد</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+
+        <div id="listLoader" class="loader">
+            <div class="spinner"></div>
+            <span style="color:var(--text-dim);font-size:13px;">⏳ جاري التحميل...</span>
+        </div>
     </div>
 
-    <!-- Quality -->
-    <select class="quality-select" id="quality">
-      <option value="1080">🎬 أفضل جودة (1080p)</option>
-      <option value="720">📺 720p</option>
-      <option value="480">📺 480p</option>
-      <option value="audio">🎵 صوت MP3</option>
-    </select>
+    <!-- ============================================
+         Modals
+         ============================================ -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>👤 الملف الشخصي</h2>
+                <button type="button" class="modal-close" id="profileCloseBtn">✕</button>
+            </div>
 
-    <!-- Progress -->
-    <div class="progress" id="progress"><div class="fill" id="progressFill"></div></div>
+            <div class="avatar-big" id="avatarBig">؟</div>
 
-    <!-- Result -->
-    <div class="result" id="result"></div>
+            <div class="profile-section">
+                <h3>📋 معلومات الحساب</h3>
+                <div class="profile-row">
+                    <span class="key">البريد</span>
+                    <span class="val" id="profileEmail">—</span>
+                </div>
+                <div class="profile-row">
+                    <span class="key">الاسم</span>
+                    <span class="val" id="profileName">—</span>
+                </div>
+                <div class="profile-row">
+                    <span class="key">التسجيل</span>
+                    <span class="val" id="profileCreated">—</span>
+                </div>
+            </div>
 
-    <!-- Hint -->
-    <div class="hint" id="hint">
-      💡 <b>كيف يعمل؟</b><br>
-      • الصق رابط من يوتيوب / تيك توك / فيسبوك / انستقرام<br>
-      • اضغط "تحميل"<br>
-      • الفيديو يظهر مع زر تحميل مباشر ✅
+            <div class="profile-section">
+                <h3>✏️ تعديل الاسم</h3>
+                <input type="text" id="editNameInput" class="profile-input" placeholder="الاسم الجديد" maxlength="30" autocomplete="off">
+                <button type="button" class="modal-btn primary" id="saveNameBtn">💾 حفظ</button>
+            </div>
+
+            <form class="profile-section" autocomplete="on" onsubmit="return false;">
+                <h3>🔒 تغيير كلمة المرور</h3>
+                <div class="input-wrapper" style="margin-bottom:10px;">
+                    <input type="password" id="currentPassInput" name="current-password" class="profile-input has-eye" placeholder="كلمة السر الحالية" autocomplete="current-password" style="margin-bottom:0;">
+                    <button type="button" class="eye-btn" data-target="currentPassInput" aria-label="عرض كلمة السر">👁️</button>
+                </div>
+                <div class="input-wrapper" style="margin-bottom:10px;">
+                    <input type="password" id="newPassInput" name="new-password" class="profile-input has-eye" placeholder="كلمة السر الجديدة" autocomplete="new-password" minlength="6" style="margin-bottom:0;">
+                    <button type="button" class="eye-btn" data-target="newPassInput" aria-label="عرض كلمة السر">👁️</button>
+                </div>
+                <div class="input-wrapper" style="margin-bottom:10px;">
+                    <input type="password" id="newPassConfirmInput" name="new-password-confirm" class="profile-input has-eye" placeholder="تأكيد كلمة السر" autocomplete="new-password" style="margin-bottom:0;">
+                    <button type="button" class="eye-btn" data-target="newPassConfirmInput" aria-label="عرض كلمة السر">👁️</button>
+                </div>
+                <button type="button" class="modal-btn primary" id="changePassBtn">🔐 تغيير</button>
+            </form>
+
+            <button type="button" class="modal-btn danger" id="logoutBtnModal">🚪 تسجيل الخروج</button>
+        </div>
     </div>
-  </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    © 2026 Oktober • t.me/mskawyagming
-  </div>
-</div>
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📊 إحصائيات النص</h2>
+                <button type="button" class="modal-close" id="statsCloseBtn">✕</button>
+            </div>
 
-<div class="toast" id="toast"></div>
+            <div class="stats-modal-grid">
+                <div class="stats-modal-item">
+                    <div class="val" id="statViews">0</div>
+                    <div class="lbl">👁️ المشاهدات</div>
+                </div>
+                <div class="stats-modal-item">
+                    <div class="val" id="statChars">0</div>
+                    <div class="lbl">🔤 الأحرف</div>
+                </div>
+            </div>
 
-<script>
-// ============================================
-// TELEGRAM WEBAPP
-// ============================================
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  try {
-    tg.setHeaderColor("#0a0e27");
-    tg.setBackgroundColor("#0a0e27");
-  } catch(e) {}
-  
-  const user = tg.initDataUnsafe?.user;
-  if (user) {
-    const info = document.getElementById("userInfo");
-    info.textContent = "👋 مرحباً " + (user.first_name || "صديقي") + " — جاهز للتحميل!";
-    info.classList.add("show");
-  }
-}
+            <div class="stats-share-box">
+                <div class="lbl">🔗 رابط المشاركة</div>
+                <div class="lnk" id="statLink">—</div>
+            </div>
 
-// ============================================
-// ELEMENTS
-// ============================================
-const $ = id => document.getElementById(id);
-const urlInput = $("url");
-const downloadBtn = $("downloadBtn");
-const qualitySelect = $("quality");
-const progress = $("progress");
-const progressFill = $("progressFill");
-const result = $("result");
-const toast = $("toast");
-const hint = $("hint");
+            <button type="button" class="modal-btn primary" id="statsCopyBtn">📋 نسخ الرابط</button>
+        </div>
+    </div>
 
-let currentPlatform = "auto";
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>✏️ تعديل النص</h2>
+                <button type="button" class="modal-close" id="editCloseBtn">✕</button>
+            </div>
 
-// ============================================
-// TOAST
-// ============================================
-function showToast(msg, duration = 2500) {
-  toast.textContent = msg;
-  toast.classList.add("show");
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => toast.classList.remove("show"), duration);
-}
+            <div class="edit-title" id="editTitleDisplay">—</div>
+            <div class="edit-meta" id="editMetaDisplay">—</div>
 
-// ============================================
-// PLATFORM CHIPS
-// ============================================
-document.querySelectorAll(".chip").forEach(chip => {
-  chip.addEventListener("click", () => {
-    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-    chip.classList.add("active");
-    currentPlatform = chip.dataset.p;
-  });
-});
+            <input type="text" id="editTitleInput" class="profile-input" placeholder="العنوان" maxlength="60" autocomplete="off">
+            <textarea id="editContentInput" class="edit-content" placeholder="النص" autocomplete="off"></textarea>
 
-// ============================================
-// DETECT PLATFORM
-// ============================================
-function detectPlatform(url) {
-  if (/youtube\.com|youtu\.be/i.test(url)) return "youtube";
-  if (/tiktok\.com/i.test(url)) return "tiktok";
-  if (/facebook\.com|fb\.watch/i.test(url)) return "facebook";
-  if (/instagram\.com/i.test(url)) return "instagram";
-  if (/twitter\.com|x\.com/i.test(url)) return "twitter";
-  return "unknown";
-}
+            <button type="button" class="modal-btn primary" id="saveEditBtn">💾 حفظ التعديلات</button>
+        </div>
+    </div>
 
-function platformInfo(p) {
-  const map = {
-    youtube: { name: "يوتيوب", icon: "▶️" },
-    tiktok: { name: "تيك توك", icon: "🎵" },
-    facebook: { name: "فيسبوك", icon: "📘" },
-    instagram: { name: "انستقرام", icon: "📸" },
-    twitter: { name: "تويتر/X", icon: "🐦" },
-    unknown: { name: "موقع", icon: "🌐" }
-  };
-  return map[p] || map.unknown;
-}
+    <a class="dev-credit" href="https://www.facebook.com/share/1Dn4faW1Ay/" target="_blank" rel="noopener noreferrer">
+        <span class="dot"></span>
+        <span>مطوّر الموقع</span>
+    </a>
 
-// ============================================
-// PROGRESS
-// ============================================
-function setProgress(pct) {
-  progress.classList.add("show");
-  progressFill.style.width = pct + "%";
-  if (pct >= 100) {
-    setTimeout(() => {
-      progress.classList.remove("show");
-      progressFill.style.width = "0%";
-    }, 1500);
-  }
-}
+    <div class="toast" id="toast"></div>
 
-// ============================================
-// DOWNLOAD
-// ============================================
-downloadBtn.addEventListener("click", doDownload);
-urlInput.addEventListener("keypress", e => { if (e.key === "Enter") doDownload(); });
-
-async function doDownload() {
-  const url = urlInput.value.trim();
-  if (!url) { showToast("⚠️ الصق رابط أولاً"); return; }
-  if (!/^https?:\/\//i.test(url)) { showToast("⚠️ رابط غير صالح"); return; }
-
-  const platform = currentPlatform === "auto" ? detectPlatform(url) : currentPlatform;
-  const info = platformInfo(platform);
-  const quality = qualitySelect.value;
-
-  downloadBtn.disabled = true;
-  result.classList.remove("show");
-  hint.style.display = "none";
-  setProgress(15);
-  showToast("🔍 جاري التحليل...");
-
-  try {
-    setProgress(40);
-    const data = await fetchFromServers(url, quality);
-    setProgress(90);
-
-    setTimeout(() => {
-      setProgress(100);
-      renderSuccess(data, info, url);
-      downloadBtn.disabled = false;
-      showToast("✅ تم!");
-    }, 300);
-  } catch (e) {
-    setProgress(100);
-    downloadBtn.disabled = false;
-    renderError(e.message, url);
-    showToast("⚠️ فشل التحميل", 3500);
-  }
-}
-
-// ============================================
-// FETCH FROM MULTIPLE SERVERS
-// ============================================
-async function fetchFromServers(url, quality) {
-  const qualityMap = { "1080": "1080", "720": "720", "480": "480", "audio": "audio" };
-
-  const body = {
-    url: url,
-    videoQuality: qualityMap[quality] || "1080",
-    downloadMode: quality === "audio" ? "audio" : "auto",
-    audioFormat: quality === "audio" ? "mp3" : "best"
-  };
-
-  // خوادم Cobalt متعددة (تجرب بالتتابع)
-  const servers = [
-    "https://api.cobalt.tools/",
-    "https://co.wuk.sh/api/json",
-    "https://cobalt-api.kwiatekmiki.com/"
-  ];
-
-  let lastError = "جميع الخوادم مشغولة";
-
-  for (const host of servers) {
-    try {
-      const res = await fetch(host, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (!res.ok) {
-        lastError = "HTTP " + res.status;
-        continue;
-      }
-
-      const data = await res.json();
-
-      if (data.status === "error") {
-        lastError = data.error?.code || "خطأ من الخادم";
-        continue;
-      }
-
-      if (data.url) {
-        return {
-          title: data.title || "فيديو",
-          author: data.author || "غير معروف",
-          duration: data.duration || "—",
-          thumbnail: data.thumbnail || "",
-          downloadUrl: data.url,
-          audioUrl: data.audio || null
+    <script>
+        // ============================================
+        // Firebase
+        // ============================================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBHnknMBiVdigipFyLMNkdFcm_tOQKWc-4",
+            authDomain: "aktubar98.firebaseapp.com",
+            databaseURL: "https://aktubar98-default-rtdb.firebaseio.com",
+            projectId: "aktubar98",
+            storageBucket: "aktubar98.appspot.com",
+            messagingSenderId: "679902534827",
+            appId: "1:679902534827:android:03edb9ea18b42eaef7abee"
         };
-      }
-    } catch (e) {
-      lastError = e.message;
-      continue;
-    }
-  }
 
-  throw new Error(lastError);
-}
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const DB = firebase.database();
+        const AUTH = firebase.auth();
 
-// ============================================
-// RENDER
-// ============================================
-function renderSuccess(data, info, originalUrl) {
-  result.classList.add("show");
-  result.innerHTML = `
-    <div class="result-header">
-      <div class="result-icon">${info.icon}</div>
-      <div class="result-info">
-        <h3>${info.name} — جاهز ✅</h3>
-        <p>تم التحميل بنجاح</p>
-      </div>
-    </div>
+        const VIEW_PAGE_URL = 'https://1digital360.blogspot.com/p/view-notehtml.html?id=';
 
-    ${data.thumbnail ? `<img src="${data.thumbnail}" style="width:100%;border-radius:12px;margin-bottom:14px;max-height:200px;object-fit:cover" onerror="this.style.display='none'">` : ''}
+        const $ = id => document.getElementById(id);
+        const authView = $('authView');
+        const dashboardView = $('dashboardView');
+        const authMsg = $('authMsg');
+        const authLoader = $('authLoader');
 
-    <div class="info-row"><span class="label">🎬 العنوان</span><span class="value">${escapeHtml(data.title)}</span></div>
-    <div class="info-row"><span class="label">👤 القناة</span><span class="value">${escapeHtml(data.author)}</span></div>
-    <div class="info-row"><span class="label">⏱️ المدة</span><span class="value">${escapeHtml(String(data.duration))}</span></div>
+        let currentUser = null;
+        let currentProfile = null;
+        let currentGeneratedLink = '';
+        let allNotes = {};
+        let currentPage = 1;
+        const NOTES_PER_PAGE = 10;
 
-    <div class="actions">
-      <a class="btn primary" href="${escapeAttr(data.downloadUrl)}" target="_blank" rel="noopener">⬇️ تحميل الفيديو</a>
-      ${data.audioUrl ? `<a class="btn success" href="${escapeAttr(data.audioUrl)}" target="_blank" rel="noopener">🎵 تحميل الصوت</a>` : ''}
-      <button class="btn" onclick="copyLink('${escapeAttr(data.downloadUrl)}')">📋 نسخ الرابط</button>
-      <a class="btn warn" href="${escapeAttr(originalUrl)}" target="_blank" rel="noopener">🔗 الرابط الأصلي</a>
-    </div>
-  `;
-}
+        // ✅ 5 حسابات لكل IP
+        const MAX_ACCOUNTS_PER_IP = 5;
 
-function renderError(msg, url) {
-  result.classList.add("show");
-  result.innerHTML = `
-    <div class="result-header">
-      <div class="result-icon">⚠️</div>
-      <div class="result-info">
-        <h3>فشل التحميل</h3>
-        <p>${escapeHtml(msg)}</p>
-      </div>
-    </div>
-    <div style="padding:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:12px;font-size:12px;color:#fbbf24;line-height:1.7;margin-bottom:14px">
-      💡 <b>نصائح:</b><br>
-      • جرب رابطاً آخر<br>
-      • انتظر دقيقة وأعد المحاولة<br>
-      • الخوادم المجانية قد تكون مشغولة
-    </div>
-    <div class="actions">
-      <button class="btn primary" onclick="doDownload()">🔄 إعادة المحاولة</button>
-      <a class="btn" href="${escapeAttr(url)}" target="_blank" rel="noopener">🔗 فتح الرابط</a>
-    </div>
-  `;
-}
+        // ============================================
+        // Helpers
+        // ============================================
+        function showToast(msg, type = 'info') {
+            const t = $('toast');
+            t.textContent = msg;
+            t.style.borderColor = type === 'success' ? 'rgba(0,200,83,0.5)' :
+                                 type === 'error' ? 'rgba(255,82,82,0.5)' :
+                                 'rgba(0,200,83,0.3)';
+            t.className = 'toast show';
+            clearTimeout(t._timeout);
+            t._timeout = setTimeout(() => t.className = 'toast', 3000);
+        }
 
-// ============================================
-// COPY
-// ============================================
-window.copyLink = (text) => {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => showToast("✅ تم النسخ")).catch(fallback);
-  } else fallback();
+        function showAuthMsg(msg, type = 'error') {
+            authMsg.textContent = msg;
+            authMsg.className = 'auth-msg show ' + (type === 'success' ? 'success' : 'error');
+            setTimeout(() => { authMsg.className = 'auth-msg'; }, 5000);
+        }
 
-  function fallback() {
-    const ta = document.createElement("textarea");
-    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand("copy"); showToast("✅ تم النسخ"); } catch(e){}
-    document.body.removeChild(ta);
-  }
-};
+        function setAuthLoading(state) { authLoader.classList.toggle('show', state); }
 
-// ============================================
-// HELPERS
-// ============================================
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-}
-function escapeAttr(s) {
-  return String(s).replace(/'/g, "%27").replace(/"/g, "%22");
-}
+        function generateId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let r = '';
+            for (let i = 0; i < 8; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+            return r;
+        }
 
-// ============================================
-// INIT
-// ============================================
-console.log("%c💀 Oktober Downloader", "color:#a5b4fc;font-size:20px;font-weight:bold");
-console.log("%c🚀 Cobalt API + Telegram WebApp", "color:#f0abfc;font-size:13px");
-</script>
+        function formatDateShort(ts) {
+            if (!ts) return '—';
+            const d = new Date(ts);
+            return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }) + ', ' + d.getFullYear();
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => showToast('📋 تم النسخ!', 'success'))
+                    .catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('📋 تم النسخ!', 'success');
+            } catch (e) {
+                showToast('❌ فشل النسخ', 'error');
+            }
+            ta.remove();
+        }
+
+        function getInitial(txt) {
+            if (!txt) return '؟';
+            return txt.trim().charAt(0).toUpperCase();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : text;
+            return div.innerHTML;
+        }
+
+        // ============================================
+        // Google Chrome Password Manager Support
+        // ============================================
+        // Chrome يتعرف تلقائياً على:
+        // - autocomplete="new-password" → يقترح كلمة سر قوية
+        // - autocomplete="current-password" → يعبّئ المحفوظ تلقائياً
+        // - name="password" / "new-password" → يربط الحقل بكلمة المرور
+        // هذا كله موجود في الـ HTML فوق ✅
+
+        // ============================================
+        // Show / Hide Password
+        // ============================================
+        document.querySelectorAll('.eye-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const input = $(targetId);
+                if (!input) return;
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.textContent = '🙈';
+                    btn.setAttribute('aria-label', 'إخفاء كلمة السر');
+                } else {
+                    input.type = 'password';
+                    btn.textContent = '👁️';
+                    btn.setAttribute('aria-label', 'عرض كلمة السر');
+                }
+            });
+        });
+
+        // ============================================
+        // Password Strength Meter
+        // ============================================
+        function calcStrength(pass) {
+            if (!pass) return { level: 0, text: '—' };
+            let score = 0;
+            if (pass.length >= 6) score++;
+            if (pass.length >= 10) score++;
+            if (pass.length >= 14) score++;
+            if (/[a-z]/.test(pass)) score++;
+            if (/[A-Z]/.test(pass)) score++;
+            if (/[0-9]/.test(pass)) score++;
+            if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+            if (score <= 2) return { level: 1, text: 'ضعيفة' };
+            if (score <= 4) return { level: 2, text: 'متوسطة' };
+            return { level: 3, text: 'قوية' };
+        }
+
+        $('signupPassword').addEventListener('input', () => {
+            const val = $('signupPassword').value;
+            const strength = calcStrength(val);
+            const el = $('passStrength');
+            const txt = $('passStrengthTxt');
+
+            el.classList.remove('weak', 'medium', 'strong');
+
+            if (strength.level === 0) {
+                txt.textContent = '—';
+            } else if (strength.level === 1) {
+                el.classList.add('weak');
+                txt.textContent = 'ضعيفة';
+            } else if (strength.level === 2) {
+                el.classList.add('medium');
+                txt.textContent = 'متوسطة';
+            } else {
+                el.classList.add('strong');
+                txt.textContent = 'قوية';
+            }
+        });
+
+        // ============================================
+        // Suggest Strong Password
+        // ============================================
+        function generateStrongPassword() {
+            const lower = 'abcdefghjkmnpqrstuvwxyz';
+            const upper = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+            const digits = '23456789';
+            const symbols = '!@#$%^&*?-_';
+            const all = lower + upper + digits + symbols;
+
+            let pass = '';
+            // ضمان وجود حرف من كل نوع
+            pass += lower[Math.floor(Math.random() * lower.length)];
+            pass += upper[Math.floor(Math.random() * upper.length)];
+            pass += digits[Math.floor(Math.random() * digits.length)];
+            pass += symbols[Math.floor(Math.random() * symbols.length)];
+
+            // البقية عشوائية
+            for (let i = 0; i < 12; i++) {
+                pass += all[Math.floor(Math.random() * all.length)];
+            }
+
+            // خلط
+            return pass.split('').sort(() => Math.random() - 0.5).join('');
+        }
+
+        $('suggestPassBtn').addEventListener('click', () => {
+            const pass = generateStrongPassword();
+            $('signupPassword').value = pass;
+            $('signupPasswordConfirm').value = pass;
+
+            // اجعلها مرئية مؤقتاً
+            $('signupPassword').type = 'text';
+            $('signupPasswordConfirm').type = 'text';
+
+            // شغّل عداد القوة
+            $('signupPassword').dispatchEvent(new Event('input'));
+
+            // حدّث أيقونة العين
+            document.querySelectorAll('.eye-btn[data-target="signupPassword"], .eye-btn[data-target="signupPasswordConfirm"]').forEach(b => {
+                b.textContent = '🙈';
+            });
+
+            showToast('✨ تم اقتراح كلمة سر قوية! احفظها الآن', 'success');
+
+            // اجعلها مرئية 5 ثواني ثم أخفها
+            setTimeout(() => {
+                if ($('signupPassword').type === 'text') {
+                    $('signupPassword').type = 'password';
+                    $('signupPasswordConfirm').type = 'password';
+                    document.querySelectorAll('.eye-btn[data-target="signupPassword"], .eye-btn[data-target="signupPasswordConfirm"]').forEach(b => {
+                        b.textContent = '👁️';
+                    });
+                }
+            }, 5000);
+        });
+
+        // ============================================
+        // IP Protection
+        // ============================================
+        async function getIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
+                const data = await res.json();
+                return data.ip;
+            } catch (e) { return null; }
+        }
+
+        function hashIP(ip) { return ip.replace(/\./g, '_').replace(/:/g, '-'); }
+
+        async function checkIPLimit() {
+            const ip = await getIP();
+            if (!ip) return { allowed: true, key: null, count: 0 };
+            const key = hashIP(ip);
+            const snap = await DB.ref('ipAccounts/' + key).once('value');
+            const count = snap.val() ? Object.keys(snap.val()).length : 0;
+            return { allowed: count < MAX_ACCOUNTS_PER_IP, key, count };
+        }
+
+        async function registerIPAccount(uid) {
+            const ip = await getIP();
+            if (!ip) return;
+            const key = hashIP(ip);
+            await DB.ref('ipAccounts/' + key + '/' + uid).set({ createdAt: Date.now() });
+        }
+
+        // ============================================
+        // Back button (step by step)
+        // ============================================
+        history.pushState({ page: 'home' }, '', location.href);
+        window.addEventListener('popstate', () => {
+            ['profileModal', 'statsModal', 'editModal'].forEach(id => {
+                const el = $(id);
+                if (el) el.classList.remove('show');
+            });
+            history.pushState({ page: 'home' }, '', location.href);
+        });
+
+        // ============================================
+        // Tabs
+        // ============================================
+        $('tabLogin').addEventListener('click', () => {
+            $('tabLogin').classList.add('active');
+            $('tabSignup').classList.remove('active');
+            $('loginForm').style.display = 'block';
+            $('signupForm').style.display = 'none';
+        });
+        $('tabSignup').addEventListener('click', () => {
+            $('tabSignup').classList.add('active');
+            $('tabLogin').classList.remove('active');
+            $('signupForm').style.display = 'block';
+            $('loginForm').style.display = 'none';
+        });
+
+        // ============================================
+        // Login
+        // ============================================
+        $('loginBtn').addEventListener('click', async () => {
+            const email = $('loginEmail').value.trim();
+            const password = $('loginPassword').value;
+            const remember = $('rememberMe').checked;
+
+            if (!email || !password) { showAuthMsg('⚠️ أدخل البريد وكلمة السر'); return; }
+
+            setAuthLoading(true);
+            try {
+                const persistence = remember
+                    ? firebase.auth.Auth.Persistence.LOCAL
+                    : firebase.auth.Auth.Persistence.SESSION;
+                await AUTH.setPersistence(persistence);
+                await AUTH.signInWithEmailAndPassword(email, password);
+                showAuthMsg('✅ تم تسجيل الدخول', 'success');
+            } catch (err) {
+                let msg = '❌ خطأ في تسجيل الدخول';
+                if (err.code === 'auth/user-not-found') msg = '❌ لا يوجد حساب';
+                else if (err.code === 'auth/wrong-password') msg = '❌ كلمة السر غير صحيحة';
+                else if (err.code === 'auth/invalid-email') msg = '❌ البريد غير صحيح';
+                else if (err.code === 'auth/too-many-requests') msg = '⚠️ محاولات كثيرة';
+                else if (err.code === 'auth/invalid-credential') msg = '❌ البريد أو كلمة السر خطأ';
+                showAuthMsg(msg);
+            } finally { setAuthLoading(false); }
+        });
+
+        // ============================================
+        // Signup
+        // ============================================
+        $('signupBtn').addEventListener('click', async () => {
+            const email = $('signupEmail').value.trim();
+            const password = $('signupPassword').value;
+            const confirm = $('signupPasswordConfirm').value;
+
+            if (!email || !password || !confirm) { showAuthMsg('⚠️ املأ الحقول'); return; }
+            if (password.length < 6) { showAuthMsg('⚠️ كلمة السر 6 أحرف على الأقل'); return; }
+            if (password !== confirm) { showAuthMsg('⚠️ كلمتا السر غير متطابقتين'); return; }
+
+            setAuthLoading(true);
+            try {
+                const ipCheck = await checkIPLimit();
+                if (!ipCheck.allowed) {
+                    showAuthMsg(`🚫 الحد الأقصى ${MAX_ACCOUNTS_PER_IP} حسابات لهذا الجهاز`);
+                    setAuthLoading(false);
+                    return;
+                }
+
+                const cred = await AUTH.createUserWithEmailAndPassword(email, password);
+                if (cred.user) {
+                    await registerIPAccount(cred.user.uid);
+                    await DB.ref('users/' + cred.user.uid + '/profile').set({
+                        email,
+                        name: email.split('@')[0],
+                        createdAt: Date.now(),
+                        ipHash: ipCheck.key || null
+                    });
+                }
+                showAuthMsg('✅ تم إنشاء الحساب', 'success');
+            } catch (err) {
+                let msg = '❌ خطأ في إنشاء الحساب';
+                if (err.code === 'auth/email-already-in-use') msg = '❌ البريد مستخدم';
+                else if (err.code === 'auth/weak-password') msg = '⚠️ كلمة السر ضعيفة';
+                else if (err.code === 'auth/invalid-email') msg = '❌ البريد غير صحيح';
+                showAuthMsg(msg);
+            } finally { setAuthLoading(false); }
+        });
+
+        // ============================================
+        // Forgot password
+        // ============================================
+        $('forgotBtn').addEventListener('click', async () => {
+            const email = $('loginEmail').value.trim();
+            if (!email) { showAuthMsg('⚠️ اكتب بريدك أولاً'); return; }
+            try {
+                await AUTH.sendPasswordResetEmail(email);
+                showAuthMsg('✅ تم إرسال رابط إعادة التعيين', 'success');
+            } catch (err) { showAuthMsg('❌ تعذر الإرسال'); }
+        });
+
+        // ============================================
+        // Google Sign-in
+        // ============================================
+        $('googleBtn').addEventListener('click', async () => {
+            setAuthLoading(true);
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+
+                const ipCheck = await checkIPLimit();
+                if (!ipCheck.allowed) {
+                    showAuthMsg(`🚫 الحد الأقصى ${MAX_ACCOUNTS_PER_IP} حسابات`);
+                    setAuthLoading(false);
+                    return;
+                }
+
+                const result = await AUTH.signInWithPopup(provider);
+                if (result.user) {
+                    const profileSnap = await DB.ref('users/' + result.user.uid + '/profile').once('value');
+                    if (!profileSnap.exists()) {
+                        await registerIPAccount(result.user.uid);
+                        await DB.ref('users/' + result.user.uid + '/profile').set({
+                            email: result.user.email,
+                            name: result.user.displayName || result.user.email.split('@')[0],
+                            createdAt: Date.now(),
+                            ipHash: ipCheck.key || null,
+                            provider: 'google'
+                        });
+                    }
+                }
+            } catch (err) {
+                if (err.code !== 'auth/popup-closed-by-user') showAuthMsg('❌ فشل الدخول بجوجل');
+            } finally { setAuthLoading(false); }
+        });
+
+        // ============================================
+        // Auth State
+        // ============================================
+        AUTH.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                authView.style.display = 'none';
+                dashboardView.style.display = 'block';
+                loadProfile();
+                loadNotes();
+            } else {
+                currentUser = null;
+                currentProfile = null;
+                authView.style.display = 'block';
+                dashboardView.style.display = 'none';
+                $('loginPassword').value = '';
+                $('signupPassword').value = '';
+                $('signupPasswordConfirm').value = '';
+            }
+        });
+
+        async function loadProfile() {
+            if (!currentUser) return;
+            const snap = await DB.ref('users/' + currentUser.uid + '/profile').once('value');
+            currentProfile = snap.val() || {};
+
+            const name = currentProfile.name || (currentUser.email ? currentUser.email.split('@')[0] : 'مستخدم');
+            const initial = getInitial(name);
+
+            $('welcomeName').textContent = name;
+            $('profileBtn').textContent = initial;
+            $('avatarBig').textContent = initial;
+            $('profileEmail').textContent = currentUser.email || '—';
+            $('profileName').textContent = name;
+            $('profileCreated').textContent = currentProfile.createdAt ? formatDateShort(currentProfile.createdAt) : '—';
+            $('editNameInput').value = name;
+        }
+
+        $('noteContentInput').addEventListener('input', () => {
+            const len = $('noteContentInput').value.length;
+            $('charCount').textContent = len.toLocaleString('ar-EG');
+        });
+
+        $('scrollToCreateBtn').addEventListener('click', () => {
+            $('createCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => $('noteTitleInput').focus(), 400);
+        });
+
+        $('myNotesBtn').addEventListener('click', () => {
+            $('tableWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        $('saveNoteBtn').addEventListener('click', async () => {
+            if (!currentUser) return;
+
+            const title = $('noteTitleInput').value.trim() || 'بدون عنوان';
+            const content = $('noteContentInput').value.trim();
+
+            if (!content) { showToast('⚠️ اكتب شيئاً أولاً', 'error'); $('noteContentInput').focus(); return; }
+            if (content.length > 50000) { showToast('⚠️ النص طويل جداً', 'error'); return; }
+
+            const btn = $('saveNoteBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            $('saveLoader').classList.add('show');
+            $('newNoteResult').classList.remove('show');
+
+            try {
+                const noteId = generateId();
+                const noteData = {
+                    title,
+                    content,
+                    createdAt: Date.now(),
+                    views: 0,
+                    ownerUid: currentUser.uid,
+                    ownerEmail: currentUser.email || '',
+                    charCount: content.length
+                };
+
+                await DB.ref('notes/' + noteId).set(noteData);
+
+                const fullLink = VIEW_PAGE_URL + noteId;
+                currentGeneratedLink = fullLink;
+                $('generatedLinkDisplay').textContent = fullLink;
+                $('newNoteResult').classList.add('show');
+
+                $('noteTitleInput').value = '';
+                $('noteContentInput').value = '';
+                $('charCount').textContent = '0';
+
+                showToast('✅ تم الحفظ بنجاح!', 'success');
+                loadNotes();
+
+            } catch (err) {
+                console.error(err);
+                showToast('❌ حدث خطأ', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                $('saveLoader').classList.remove('show');
+            }
+        });
+
+        $('copyNewLinkBtn').addEventListener('click', () => copyToClipboard($('generatedLinkDisplay').textContent));
+        $('openNewLinkBtn').addEventListener('click', () => window.open($('generatedLinkDisplay').textContent, '_blank', 'noopener'));
+
+        function loadNotes() {
+            if (!currentUser) return;
+            $('listLoader').classList.add('show');
+
+            DB.ref('notes').orderByChild('ownerUid').equalTo(currentUser.uid).once('value', snapshot => {
+                $('listLoader').classList.remove('show');
+                allNotes = snapshot.val() || {};
+                currentPage = 1;
+                renderNotes();
+            }).catch(err => {
+                console.error('orderByChild فشل', err);
+                DB.ref('notes').once('value', snap => {
+                    $('listLoader').classList.remove('show');
+                    const all = snap.val() || {};
+                    const filtered = {};
+                    for (const k in all) {
+                        if (all[k].ownerUid === currentUser.uid) filtered[k] = all[k];
+                    }
+                    allNotes = filtered;
+                    currentPage = 1;
+                    renderNotes();
+                });
+            });
+        }
+
+        function renderNotes() {
+            const keys = Object.keys(allNotes);
+            let totalViews = 0, totalChars = 0;
+
+            keys.forEach(k => {
+                totalViews += (allNotes[k].views || 0);
+                totalChars += (allNotes[k].charCount || (allNotes[k].content ? allNotes[k].content.length : 0));
+            });
+
+            $('totalNotes').textContent = keys.length;
+            $('totalViews').textContent = totalViews;
+            $('totalChars').textContent = totalChars.toLocaleString('ar-EG');
+            $('notesCount').textContent = keys.length;
+
+            if (keys.length === 0) {
+                $('tableBody').innerHTML = `
+                    <div class="empty-state">
+                        <span class="big-icon">📭</span>
+                        <p>لا توجد نصوص بعد</p>
+                    </div>`;
+                $('pagination').innerHTML = '';
+                return;
+            }
+
+            keys.sort((a, b) => (allNotes[b].createdAt || 0) - (allNotes[a].createdAt || 0));
+
+            const totalPages = Math.ceil(keys.length / NOTES_PER_PAGE);
+            const start = (currentPage - 1) * NOTES_PER_PAGE;
+            const pageKeys = keys.slice(start, start + NOTES_PER_PAGE);
+
+            let html = '';
+            for (const key of pageKeys) {
+                const note = allNotes[key];
+                const views = note.views || 0;
+                const dateStr = formatDateShort(note.createdAt);
+
+                html += `
+                    <div class="table-row">
+                        <div class="td-title">
+                            <div class="title-icon">📄</div>
+                            <div class="title-text" title="${escapeHtml(note.title)}">${escapeHtml(note.title)}</div>
+                        </div>
+                        <div class="td-views">${views}</div>
+                        <div class="td-date">${dateStr}</div>
+                        <div class="td-actions">
+                            <button type="button" class="act-btn stats" onclick="showStats('${key}')" title="إحصائيات" aria-label="إحصائيات">📊</button>
+                            <button type="button" class="act-btn edit" onclick="editNote('${key}')" title="تعديل" aria-label="تعديل">✏️</button>
+                            <button type="button" class="act-btn delete" onclick="deleteNote('${key}')" title="حذف" aria-label="حذف">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }
+            $('tableBody').innerHTML = html;
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            if (totalPages <= 1) {
+                $('pagination').innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            html += `<button type="button" class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">‹</button>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<button type="button" class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<button type="button" class="page-btn" disabled>...</button>`;
+                }
+            }
+
+            html += `<button type="button" class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">›</button>`;
+
+            $('pagination').innerHTML = html;
+        }
+
+        window.goToPage = (p) => {
+            const totalPages = Math.ceil(Object.keys(allNotes).length / NOTES_PER_PAGE);
+            if (p < 1 || p > totalPages) return;
+            currentPage = p;
+            renderNotes();
+            $('tableWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        window.showStats = (noteId) => {
+            const note = allNotes[noteId];
+            if (!note) return;
+
+            $('statViews').textContent = note.views || 0;
+            $('statChars').textContent = (note.charCount || (note.content ? note.content.length : 0)).toLocaleString('ar-EG');
+            $('statLink').textContent = VIEW_PAGE_URL + noteId;
+
+            $('statsCopyBtn').onclick = () => copyToClipboard(VIEW_PAGE_URL + noteId);
+
+            $('statsModal').classList.add('show');
+        };
+
+        $('statsCloseBtn').addEventListener('click', () => $('statsModal').classList.remove('show'));
+        $('statsModal').addEventListener('click', (e) => {
+            if (e.target === $('statsModal')) $('statsModal').classList.remove('show');
+        });
+
+        window.editNote = (noteId) => {
+            const note = allNotes[noteId];
+            if (!note) return;
+
+            $('editTitleDisplay').textContent = '📄 ' + (note.title || 'بدون عنوان');
+            $('editMetaDisplay').textContent = '📅 ' + formatDateShort(note.createdAt) + ' • 👁️ ' + (note.views || 0) + ' مشاهدة';
+            $('editTitleInput').value = note.title || '';
+            $('editContentInput').value = note.content || '';
+
+            $('saveEditBtn').onclick = () => saveEdit(noteId);
+
+            $('editModal').classList.add('show');
+        };
+
+        async function saveEdit(noteId) {
+            const newTitle = $('editTitleInput').value.trim() || 'بدون عنوان';
+            const newContent = $('editContentInput').value;
+
+            if (!newContent.trim()) { showToast('⚠️ النص فارغ', 'error'); return; }
+            if (newContent.length > 50000) { showToast('⚠️ النص طويل جداً', 'error'); return; }
+
+            try {
+                await DB.ref('notes/' + noteId).update({
+                    title: newTitle,
+                    content: newContent,
+                    charCount: newContent.length,
+                    updatedAt: Date.now()
+                });
+                showToast('✅ تم حفظ التعديلات', 'success');
+                $('editModal').classList.remove('show');
+                loadNotes();
+            } catch (err) {
+                console.error(err);
+                showToast('❌ فشل الحفظ', 'error');
+            }
+        }
+
+        $('editCloseBtn').addEventListener('click', () => $('editModal').classList.remove('show'));
+        $('editModal').addEventListener('click', (e) => {
+            if (e.target === $('editModal')) $('editModal').classList.remove('show');
+        });
+
+        window.deleteNote = (noteId) => {
+            if (!currentUser) return;
+            if (!confirm('⚠️ تأكيد الحذف؟')) return;
+
+            DB.ref('notes/' + noteId).once('value').then(snap => {
+                if (!snap.exists()) { showToast('❌ غير موجود', 'error'); return; }
+                if (snap.val().ownerUid !== currentUser.uid) {
+                    showToast('🚫 لا يمكنك حذف هذا النص', 'error');
+                    return;
+                }
+                return DB.ref('notes/' + noteId).remove();
+            }).then(() => {
+                showToast('🗑️ تم الحذف', 'success');
+                loadNotes();
+            }).catch(err => {
+                console.error(err);
+                showToast('❌ فشل الحذف', 'error');
+            });
+        };
+
+        $('profileBtn').addEventListener('click', () => {
+            $('profileModal').classList.add('show');
+            $('currentPassInput').value = '';
+            $('newPassInput').value = '';
+            $('newPassConfirmInput').value = '';
+        });
+
+        $('profileCloseBtn').addEventListener('click', () => $('profileModal').classList.remove('show'));
+        $('profileModal').addEventListener('click', (e) => {
+            if (e.target === $('profileModal')) $('profileModal').classList.remove('show');
+        });
+
+        $('saveNameBtn').addEventListener('click', async () => {
+            const newName = $('editNameInput').value.trim();
+            if (!newName) { showToast('⚠️ أدخل الاسم', 'error'); return; }
+            if (newName.length > 30) { showToast('⚠️ الاسم طويل جداً', 'error'); return; }
+
+            try {
+                await DB.ref('users/' + currentUser.uid + '/profile/name').set(newName);
+                currentProfile.name = newName;
+                const initial = getInitial(newName);
+                $('welcomeName').textContent = newName;
+                $('profileBtn').textContent = initial;
+                $('avatarBig').textContent = initial;
+                $('profileName').textContent = newName;
+                showToast('✅ تم حفظ الاسم', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('❌ فشل الحفظ', 'error');
+            }
+        });
+
+        $('changePassBtn').addEventListener('click', async () => {
+            const cur = $('currentPassInput').value;
+            const np = $('newPassInput').value;
+            const npc = $('newPassConfirmInput').value;
+
+            if (!cur || !np || !npc) { showToast('⚠️ املأ جميع الحقول', 'error'); return; }
+            if (np.length < 6) { showToast('⚠️ كلمة السر 6 أحرف على الأقل', 'error'); return; }
+            if (np !== npc) { showToast('⚠️ كلمتا السر غير متطابقتين', 'error'); return; }
+
+            try {
+                const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, cur);
+                await currentUser.reauthenticateWithCredential(cred);
+                await currentUser.updatePassword(np);
+                $('currentPassInput').value = '';
+                $('newPassInput').value = '';
+                $('newPassConfirmInput').value = '';
+                showToast('✅ تم تغيير كلمة المرور', 'success');
+            } catch (err) {
+                console.error(err);
+                if (err.code === 'auth/wrong-password') showToast('❌ كلمة السر الحالية خاطئة', 'error');
+                else if (err.code === 'auth/requires-recent-login') showToast('⚠️ يرجى إعادة تسجيل الدخول', 'error');
+                else showToast('❌ فشل تغيير كلمة المرور', 'error');
+            }
+        });
+
+        $('logoutBtnModal').addEventListener('click', async () => {
+            if (!confirm('هل تريد تسجيل الخروج؟')) return;
+            $('profileModal').classList.remove('show');
+            await AUTH.signOut();
+        });
+
+        $('refreshBtn').addEventListener('click', () => {
+            if (currentUser) {
+                loadNotes();
+                loadProfile();
+                showToast('🔄 تم التحديث');
+            }
+        });
+
+        ['loginEmail', 'loginPassword'].forEach(id => {
+            $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+        });
+        ['signupEmail', 'signupPassword', 'signupPasswordConfirm'].forEach(id => {
+            $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('signupBtn').click(); });
+        });
+
+        setInterval(() => { if (currentUser) loadNotes(); }, 30000);
+
+        console.log('🌿 TxtVault Loaded — 5 accounts/IP — Full responsive — Chrome Password Manager ready');
+    </script>
 </body>
 </html>
